@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Rekap Akademik - Scholar Planner</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <main class="main-content">
+        <h1 class="page-title">Rekap Akademik</h1>
+
+        <div class="page-layout">
+            <div class="card-panel">
+                <h3>Persentase Status Tugas</h3><br>
+                <div class="donut-chart-container">
+                    <div class="donut-chart" id="chart-donut"></div>
+                    <div class="chart-legend">
+                        <div class="legend-item"><span class="dot" style="background: #10b981;"></span> Selesai (<span id="pct-selesai">0</span>%)</div>
+                        <div class="legend-item"><span class="dot" style="background: #f59e0b;"></span> Dikerjakan (<span id="pct-proses">0</span>%)</div>
+                        <div class="legend-item"><span class="dot" style="background: #3b82f6;"></span> Belum Mulai (<span id="pct-belum">0</span>%)</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-panel">
+                <h3>Rekap Tugas Per Mata Kuliah</h3><br>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>MATA KULIAH</th>
+                            <th>BELUM</th>
+                            <th>PROSES</th>
+                            <th>SELESAI</th>
+                            <th>TOTAL</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tb-rekap"></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script src="storage.js"></script>
+    <script src="layout.js"></script>
+    <script>
+        function renderRekap() {
+            const tugasList = Storage.getTugas();
+            const matkulList = Storage.getMataKuliah();
+
+            const totalTugas = tugasList.length;
+            if (totalTugas > 0) {
+                const selesai = tugasList.filter(t => t.status === 'Selesai').length;
+                const proses = tugasList.filter(t => t.status === 'Dikerjakan').length;
+                const belum = tugasList.filter(t => t.status === 'Belum Mulai').length;
+
+                const pctSelesai = Math.round((selesai / totalTugas) * 100);
+                const pctProses = Math.round((proses / totalTugas) * 100);
+                const pctBelum = 100 - (pctSelesai + pctProses);
+
+                document.getElementById('pct-selesai').innerText = pctSelesai;
+                document.getElementById('pct-proses').innerText = pctProses;
+                document.getElementById('pct-belum').innerText = pctBelum >= 0 ? pctBelum : 0;
+
+                const p1 = pctBelum;
+                const p2 = p1 + pctProses;
+                document.getElementById('chart-donut').style.background = `conic-gradient(
+                    #3b82f6 0% ${p1}%, 
+                    #f59e0b ${p1}% ${p2}%, 
+                    #10b981 ${p2}% 100%
+                )`;
+            }
+
+            const tbody = document.getElementById('tb-rekap');
+            tbody.innerHTML = matkulList.map(m => {
+                const tasks = tugasList.filter(t => t.mataKuliah === m.nama);
+                const belum = tasks.filter(t => t.status === 'Belum Mulai').length;
+                const proses = tasks.filter(t => t.status === 'Dikerjakan').length;
+                const selesai = tasks.filter(t => t.status === 'Selesai').length;
+                
+                return `
+                    <tr>
+                        <td>${m.nama}</td>
+                        <td>${belum}</td>
+                        <td>${proses}</td>
+                        <td>${selesai}</td>
+                        <td>${tasks.length}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        renderRekap();
+    </script>
+</body>
+</html>

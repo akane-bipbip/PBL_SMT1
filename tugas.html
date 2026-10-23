@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Tugas Mahasiswa - Scholar Planner</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <main class="main-content">
+        <h1 class="page-title">Daftar Tugas Mahasiswa</h1>
+
+        <div class="page-layout">
+            <div class="card-panel">
+                <h3>Filter & Daftar Tugas</h3><br>
+                <div style="display:flex; gap:10px; margin-bottom: 20px;">
+                    <select id="filter-status" class="form-control" onchange="renderTugas()">
+                        <option value="">Semua Status</option>
+                        <option value="Belum Mulai">Belum Mulai</option>
+                        <option value="Dikerjakan">Dikerjakan</option>
+                        <option value="Selesai">Selesai</option>
+                    </select>
+                    <select id="filter-prioritas" class="form-control" onchange="renderTugas()">
+                        <option value="">Semua Prioritas</option>
+                        <option value="Tinggi">Tinggi</option>
+                        <option value="Sedang">Sedang</option>
+                        <option value="Rendah">Rendah</option>
+                    </select>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Mata Kuliah</th>
+                            <th>Diberikan</th>
+                            <th>Deadline</th>
+                            <th>Prioritas</th>
+                            <th>Status</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tb-tugas"></tbody>
+                </table>
+            </div>
+
+            <div class="card-panel">
+                <h3 id="form-title-tugas">Tambah Tugas</h3><br>
+                <form id="form-tugas">
+                    <input type="hidden" id="edit-id-tugas" value="">
+                    <div class="form-group">
+                        <label>Mata Kuliah</label>
+                        <select id="tugas-matkul" class="form-control" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Tanggal Diberikan</label>
+                        <input type="date" id="tgl-diberikan" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Deadline</label>
+                        <input type="date" id="deadline" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Prioritas</label>
+                        <select id="prioritas" class="form-control">
+                            <option value="Tinggi">Tinggi</option>
+                            <option value="Sedang" selected>Sedang</option>
+                            <option value="Rendah">Rendah</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select id="status" class="form-control">
+                            <option value="Belum Mulai">Belum Mulai</option>
+                            <option value="Dikerjakan">Dikerjakan</option>
+                            <option value="Selesai">Selesai</option>
+                        </select>
+                    </div>
+                    <div class="btn-group">
+                        <button type="button" id="btn-cancel-tugas" class="btn btn-secondary" style="display:none;" onclick="resetFormTugas()">Batal</button>
+                        <button type="submit" class="btn btn-primary" id="btn-submit-tugas">Simpan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script src="storage.js"></script>
+    <script src="utils.js"></script>
+    <script src="layout.js"></script>
+    <script>
+        function renderMatkulOptions() {
+            const matkulList = Storage.getMataKuliah();
+            const select = document.getElementById('tugas-matkul');
+            select.innerHTML = matkulList.map(m => `<option value="${m.nama}">${m.nama}</option>`).join('');
+        }
+
+        function renderTugas() {
+            let list = Storage.getTugas();
+            const filterStatus = document.getElementById('filter-status').value;
+            const filterPrioritas = document.getElementById('filter-prioritas').value;
+
+            if (filterStatus) {
+                list = list.filter(t => t.status === filterStatus);
+            }
+            if (filterPrioritas) {
+                list = list.filter(t => t.prioritas === filterPrioritas);
+            }
+
+            const tbody = document.getElementById('tb-tugas');
+            if (list.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Tidak ada data tugas.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = list.map((item) => `
+                <tr>
+                    <td>${item.mataKuliah}</td>
+                    <td>${Utils.formatDateReadable(item.tglDiberikan)}</td>
+                    <td>${Utils.formatDateReadable(item.deadline)}</td>
+                    <td>${item.prioritas}</td>
+                    <td>${item.status}</td>
+                    <td>
+                        <span class="action-link" onclick="editTugas(${item.id})">Edit</span> | 
+                        <span class="action-link delete" onclick="deleteTugas(${item.id})">Hapus</span>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function editTugas(id) {
+            const list = Storage.getTugas();
+            const item = list.find(t => t.id === id);
+            if (!item) return;
+
+            document.getElementById('edit-id-tugas').value = item.id;
+            document.getElementById('tugas-matkul').value = item.mataKuliah;
+            document.getElementById('tgl-diberikan').value = item.tglDiberikan;
+            document.getElementById('deadline').value = item.deadline;
+            document.getElementById('prioritas').value = item.prioritas;
+            document.getElementById('status').value = item.status;
+
+            document.getElementById('form-title-tugas').innerText = 'Edit Tugas';
+            document.getElementById('btn-submit-tugas').innerText = 'Update';
+            document.getElementById('btn-cancel-tugas').style.display = 'inline-block';
+        }
+
+        function resetFormTugas() {
+            document.getElementById('form-tugas').reset();
+            document.getElementById('edit-id-tugas').value = '';
+            document.getElementById('form-title-tugas').innerText = 'Tambah Tugas';
+            document.getElementById('btn-submit-tugas').innerText = 'Simpan';
+            document.getElementById('btn-cancel-tugas').style.display = 'none';
+        }
+
+        function deleteTugas(id) {
+            if (confirm('Yakin ingin menghapus tugas ini?')) {
+                let list = Storage.getTugas();
+                list = list.filter(t => t.id !== id);
+                Storage.setTugas(list);
+                renderTugas();
+                resetFormTugas();
+            }
+        }
+
+        document.getElementById('form-tugas').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const list = Storage.getTugas();
+            const editId = document.getElementById('edit-id-tugas').value;
+
+            const tugasData = {
+                id: editId ? Number(editId) : Date.now(),
+                mataKuliah: document.getElementById('tugas-matkul').value,
+                tglDiberikan: document.getElementById('tgl-diberikan').value,
+                deadline: document.getElementById('deadline').value,
+                prioritas: document.getElementById('prioritas').value,
+                status: document.getElementById('status').value
+            };
+
+            if (!editId) {
+                list.push(tugasData);
+            } else {
+                const index = list.findIndex(t => t.id === Number(editId));
+                if (index !== -1) list[index] = tugasData;
+            }
+
+            Storage.setTugas(list);
+            renderTugas();
+            resetFormTugas();
+        });
+
+        renderMatkulOptions();
+        renderTugas();
+    </script>
+</body>
+</html>

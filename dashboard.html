@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard - Scholar Planner</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <main class="main-content">
+        <h1 class="page-title">Dashboard Mahasiswa</h1>
+
+        <div class="stats-container">
+            <div class="stat-card">
+                <div class="stat-title">Tugas Belum Selesai</div>
+                <div class="stat-value" id="stat-belum-selesai">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">Mendekati Deadline</div>
+                <div class="stat-value" id="stat-mendekati-deadline">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">Jadwal Hari Ini</div>
+                <div class="stat-value" id="stat-jadwal-hari-ini">0</div>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="card-panel">
+                <div class="card-header">
+                    <h3>Tugas Dekat Deadline</h3>
+                    <a href="tugas.html">Lihat Semua &rarr;</a>
+                </div>
+                <div id="list-dekat-deadline"></div>
+            </div>
+
+            <div class="card-panel">
+                <div class="card-header">
+                    <h3>Jadwal Kuliah Hari Ini</h3>
+                    <a href="jadwal.html">Atur Jadwal &rarr;</a>
+                </div>
+                <div id="list-jadwal-hari-ini"></div>
+            </div>
+        </div>
+    </main>
+
+    <script src="storage.js"></script>
+    <script src="utils.js"></script>
+    <script src="layout.js"></script>
+    <script src="dashboard.js"></script>
+</body>
+</html>

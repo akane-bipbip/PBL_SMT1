@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Jadwal Belajar - Scholar Planner</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <main class="main-content">
+        <h1 class="page-title">Jadwal Belajar</h1>
+
+        <div class="page-layout">
+            <div class="card-panel">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Mata Kuliah</th>
+                            <th>Kode</th>
+                            <th>Dosen</th>
+                            <th>Hari</th>
+                            <th>Waktu</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tb-jadwal"></tbody>
+                </table>
+            </div>
+
+            <div class="card-panel">
+                <h3 id="form-title-jadwal">Tambah Jadwal</h3><br>
+                <form id="form-jadwal">
+                    <input type="hidden" id="edit-id-jadwal" value="">
+                    <div class="form-group">
+                        <label>Mata Kuliah</label>
+                        <input type="text" id="jadwal-matkul" class="form-control" placeholder="Contoh : Matematika" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Kode</label>
+                        <input type="text" id="jadwal-kode" class="form-control" placeholder="Contoh : IF104" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Dosen</label>
+                        <input type="text" id="jadwal-dosen" class="form-control" placeholder="Contoh : Dr. Andi" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Hari</label>
+                        <select id="jadwal-hari" class="form-control" required>
+                            <option value="Senin">Senin</option>
+                            <option value="Selasa">Selasa</option>
+                            <option value="Rabu">Rabu</option>
+                            <option value="Kamis">Kamis</option>
+                            <option value="Jumat">Jumat</option>
+                            <option value="Sabtu">Sabtu</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Waktu</label>
+                        <input type="text" id="jadwal-waktu" class="form-control" placeholder="Contoh : 08.00-10.00" required>
+                    </div>
+                    <div class="btn-group">
+                        <button type="button" id="btn-cancel-jadwal" class="btn btn-secondary" style="display:none;" onclick="resetFormJadwal()">Batal</button>
+                        <button type="submit" class="btn btn-primary" id="btn-submit-jadwal">Simpan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script src="storage.js"></script>
+    <script src="layout.js"></script>
+    <script>
+        function renderJadwal() {
+            const list = Storage.getJadwal();
+            const tbody = document.getElementById('tb-jadwal');
+            if (list.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Tidak ada jadwal tersedia.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = list.map((item) => `
+                <tr>
+                    <td>${item.mataKuliah}</td>
+                    <td>${item.kode}</td>
+                    <td>${item.dosen}</td>
+                    <td>${item.hari}</td>
+                    <td>${item.waktu}</td>
+                    <td>
+                        <span class="action-link" onclick="editJadwal(${item.id})">Edit</span> | 
+                        <span class="action-link delete" onclick="deleteJadwal(${item.id})">Hapus</span>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function editJadwal(id) {
+            const list = Storage.getJadwal();
+            const item = list.find(j => j.id === id);
+            if (!item) return;
+
+            document.getElementById('edit-id-jadwal').value = item.id;
+            document.getElementById('jadwal-matkul').value = item.mataKuliah;
+            document.getElementById('jadwal-kode').value = item.kode;
+            document.getElementById('jadwal-dosen').value = item.dosen;
+            document.getElementById('jadwal-hari').value = item.hari;
+            document.getElementById('jadwal-waktu').value = item.waktu;
+
+            document.getElementById('form-title-jadwal').innerText = 'Edit Jadwal';
+            document.getElementById('btn-submit-jadwal').innerText = 'Update';
+            document.getElementById('btn-cancel-jadwal').style.display = 'inline-block';
+        }
+
+        function resetFormJadwal() {
+            document.getElementById('form-jadwal').reset();
+            document.getElementById('edit-id-jadwal').value = '';
+            document.getElementById('form-title-jadwal').innerText = 'Tambah Jadwal';
+            document.getElementById('btn-submit-jadwal').innerText = 'Simpan';
+            document.getElementById('btn-cancel-jadwal').style.display = 'none';
+        }
+
+        function deleteJadwal(id) {
+            if (confirm('Yakin ingin menghapus jadwal ini?')) {
+                let list = Storage.getJadwal();
+                list = list.filter(j => j.id !== id);
+                Storage.setJadwal(list);
+                renderJadwal();
+                resetFormJadwal();
+            }
+        }
+
+        document.getElementById('form-jadwal').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const list = Storage.getJadwal();
+            const editId = document.getElementById('edit-id-jadwal').value;
+
+            const jadwalData = {
+                id: editId ? Number(editId) : Date.now(),
+                mataKuliah: document.getElementById('jadwal-matkul').value,
+                kode: document.getElementById('jadwal-kode').value,
+                dosen: document.getElementById('jadwal-dosen').value,
+                hari: document.getElementById('jadwal-hari').value,
+                waktu: document.getElementById('jadwal-waktu').value
+            };
+
+            if (!editId) {
+                list.push(jadwalData);
+            } else {
+                const index = list.findIndex(j => j.id === Number(editId));
+                if (index !== -1) list[index] = jadwalData;
+            }
+
+            Storage.setJadwal(list);
+            renderJadwal();
+            resetFormJadwal();
+        });
+
+        renderJadwal();
+    </script>
+</body>
+</html>
