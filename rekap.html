@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Scholar Planner – Rekap Akademik</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body data-page="rekap">
+  <div class="app">
+
+    <aside class="sidebar" id="sidebar"></aside>
+
+    <main class="content">
+      <h1 class="page-title">Rekap Akademik</h1>
+
+      <div class="layout layout-even">
+
+        <!-- Grafik donat -->
+        <section class="panel">
+          <h2 class="panel-title">Persentase Status Tugas</h2>
+          <div class="chart">
+            <div id="chart"></div>
+            <ul class="legend" id="legend"></ul>
+          </div>
+        </section>
+
+        <!-- Tabel rekap -->
+        <section class="panel">
+          <h2 class="panel-title">Rekap Tugas Per Mata Kuliah</h2>
+          <div class="table-wrap">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th scope="col">Mata Kuliah</th>
+                  <th scope="col" class="num">Belum</th>
+                  <th scope="col" class="num">Proses</th>
+                  <th scope="col" class="num">Selesai</th>
+                  <th scope="col" class="num">Total</th>
+                </tr>
+              </thead>
+              <tbody id="tbody"></tbody>
+            </table>
+          </div>
+        </section>
+
+      </div>
+    </main>
+
+  </div>
+
+  <script src="js/utils.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/layout.js"></script>
+  <script src="js/rekap.js"></script>
+</body>
+</html>
